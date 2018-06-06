@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script>    
+    var obj = {}
+    Object.defineProperty(obj,'hello',{
+        set: function(val) {
+            console.log('set方法被调用了,参数是'+val);
+            
+        },
+        get: function() {
+            console.log('get方法被调用了')
+        }
+    })
+    obj.hello //get方法被调用了
+    obj.hello = 'aaa' //set方法被调用了,参数是aaa
+</script>
+</html>

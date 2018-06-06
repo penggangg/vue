@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id='app'>
+        <input type="text" id='input' v-model='text'>
+        <br/>
+        <!-- <span id='demo'>{{ text }}</span> -->
+        <br/>{{text}}
+    </div>
+</body>
+<script>
+    function nodeToFramement(node, vm) {
+        var flag = document.createDocumentFragment()
+        var child
+        while (child = node.firstChild) {
+            compile(child, vm)
+            flag.appendChild(child) //将子节点劫持到文档片段中
+        }
+        return flag
+    }
+
+    function defineReactivre(obj, key, val) {
+        var dep =new Dep()
+        Object.defineProperty(obj, key, {
+            get: function() {
+                if(Dep.target) dep.addSub(Dep.target)
+                return val
+            },
+            set: function(newVal) {
+                if (newVal === val) return
+                val = newVal
+                dep.notify()
+                console.log(val)
+            }
+        })
+    }
+    function observer(obj ,vm) {
+        Object.keys(obj).forEach((key)=>{
+            defineReactivre(vm, key, obj[key])
+        })
+    }
+
+
+    function compile(node, vm) {
+        var reg = /\{\{(.*)\}\}/
+        // 判断节点类型 1 元素 3 text
+        console.dir(node)
+        if (node.nodeType === 1) {
+            var attr = node.attributes
+            console.log(attr)
+            // 解析属性
+            for (let i = 0; i < attr.length; i++) {
+                if (attr[i].nodeName == 'v-model') {
+                    var name = attr[i].nodeValue // 获取v-model绑定的属性名
+                    console.log(name)
+                    node.addEventListener('input',(e)=>{
+                        vm[name] = e.target.value
+                    })
+                    node.value = vm.data[name] // 将data的值付给node
+                    node.removeAttribute('v-model')
+                }
+                if (reg.test(node.innerText)) {
+                    var name = RegExp.$1
+                    name = name.trim() // 获取v-model绑定的属性名
+                    node.innerText = vm.data[name] // 将data的值付给node
+                    new Watcher(vm, node, name)
+                }
+            }
+        }
+        if (node.nodeType === 3) {
+            console.log(node.nodeValue)
+            if (reg.test(node.nodeValue)) {
+                var name = RegExp.$1
+                name = name.trim()
+                node.nodeValue = vm.data[name]
+                new Watcher(vm, node, name)
+            }
+        }
+    }
+    function Watcher(vm, node, name){
+        Dep.target = this
+        this.name = name
+        this.node = node 
+        this.vm = vm 
+        this.update()
+        Dep.target = null
+    }
+    Watcher.prototype = {
+        update: function() {
+            this.get()
+            this.node.nodeValue = this.value
+        },
+        get: function() {
+            this.value = this.vm[this.name]
+        }
+    }
+    function Dep() {
+        this.subs = []
+    }
+    Dep.prototype = {
+        addSub: function(sub) {
+            this.subs.push(sub)
+        },
+        notify: function(){
+            this.subs.forEach(function(sub){
+                sub.update()
+            })
+        }
+    }
+    class Vue {
+        constructor(option) {
+            this.data = option.data
+            var id = option.el
+            observer(this.data,this)
+            var dom = nodeToFramement(document.getElementById(id), this)
+            document.getElementById(id).appendChild(dom)
+           
+        }
+    }
+    var vm = new Vue({
+        el: 'app',
+        data: {
+            text: 'helloWorld'
+        }
+    })
+</script>
+
+</html>

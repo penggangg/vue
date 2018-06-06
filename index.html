@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div id='app'>
+        <span id='demo'>{{text}}</span><br/>
+        <input type="text" id='input' v-model='text'>
+    </div>
+</body>
+<script>
+    let obj = {}
+    Object.defineProperty(obj,'hello',{
+        set: function(newval) {
+            document.getElementById('demo').innerHTML = newval
+            document.getElementById('input').value = newval
+        }
+    })
+    document.getElementById('input').addEventListener('input',function(e){
+        obj.hello = e.target.value
+    });
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            text: 'helloWorld'
+        }
+    })
+</script>
+</html>

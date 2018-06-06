@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // 一个发布者
+    var pub={
+        publish:function(){
+            dep.notify()
+        }
+    }
+    // 2个观察者
+    var sub1 = { update:function(){console.log(1)} }
+    var sub2 = { update:function(){console.log(2)} }
+    //  一个主题对象
+    function Dep() {
+        this.subs = [sub1, sub2]
+    }
+    Dep.prototype.notify = function() {
+        this.subs.forEach((item)=>{
+            item.update()
+        })
+    }
+    var dep = new Dep()
+    pub.publish()
+</script>
+</html>
